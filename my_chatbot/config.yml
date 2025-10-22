@@ -1,0 +1,32 @@
+version: "3.1"
+
+language: "id"
+
+pipeline:
+  # --- Tahap 1: internal Rasa NLU ---
+  - name: WhitespaceTokenizer
+  - name: RegexFeaturizer
+  - name: CountVectorsFeaturizer 
+  - name: CountVectorsFeaturizer
+    analyzer: char_wb
+    min_ngram: 1
+    max_ngram: 4
+  - name: DIETClassifier
+    epochs: 150
+    constrain_similarities: true
+    entity_recognition: true
+    intent_classification: true
+  - name: EntitySynonymMapper
+
+  # --- Tahap 2: eksternal fallback ke NLU Custom Interpreter ---
+  - name: NLUCommandAdapter
+    url: "http://localhost:8000/model/parse"
+    timeout: 5
+    verify_response: true
+
+policies:
+  - name: RulePolicy
+    enable_fallback_prediction: true
+  - name: MemoizationPolicy
+
+assistant_id: info_pasca_chatbot
